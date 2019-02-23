@@ -28,10 +28,10 @@ void* t2f(void *args) {
 int main() {
     pthread_t t1, t2;
     printf("App start work with counter = %d\n", counter);
-    int p2arg = 0;
+    int t2arg = 0;
 
     pthread_create(&t1, NULL, t1f, NULL);
-    pthread_create(&t2, NULL, t2f, &p2arg);
+    pthread_create(&t2, NULL, t2f, &t2arg);
     
     pthread_join(t1, NULL);
     pthread_join(t2, NULL);
