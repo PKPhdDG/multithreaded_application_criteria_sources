@@ -5,32 +5,26 @@ static volatile int counter = 0;
 pthread_mutex_t m;
 
 void* t1f(void *args) {
-    int i;
+    int *i = ((int*)args);
     pthread_mutex_lock(&m);
-    ++counter;
-    t1f(NULL);
+    if(*i) {
+        --*i;
+        ++counter;
+        t1f(args);
+    }
     pthread_mutex_unlock(&m);
-    return NULL;
-}
-
-void* t2f(void *args) {
-    int i;
-    pthread_mutex_lock(&m);
-    ++counter;
-    t2f(NULL);
-    pthread_mutex_unlock(&m);
+    
     return NULL;
 }
 
 int main() {
-    pthread_t t1, t2;
+    pthread_t t1;
     printf("App start work with counter = %d\n", counter);
+    int t1arg = 100;
 
-    pthread_create(&t1, NULL, t1f, NULL);
-    pthread_create(&t2, NULL, t2f, NULL);
+    pthread_create(&t1, NULL, t1f, &t1arg);
     
     pthread_join(t1, NULL);
-    pthread_join(t2, NULL);
     printf("App finish work with counter = %d\n", counter);
     return 0;
 }
