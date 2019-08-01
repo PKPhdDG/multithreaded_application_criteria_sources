@@ -9,21 +9,21 @@ pthread_mutex_t m, n;
 volatile int i = 0;
 const size_t sleep_time_s = 1;
 
-void* t1f(void *args) {
+void* t2f(void *args) {
 	int r = 0;
 	bool job_is_done = false;
 	while(!job_is_done) {
 		pthread_mutex_lock(&m);
 		r=pthread_mutex_trylock(&n);
 		if (r == EBUSY) {
-			printf("Cannot lock mutex n in thread t1.\n");
+			printf("Cannot lock mutex n in thread t2.\n");
 			pthread_mutex_unlock(&m);
 			sleep(sleep_time_s);
 			continue;
 		}
 		else {
-			printf("Mutex n in thread t1 is locked.\n");
-			printf("Thread t1 made its jobs.\n");
+			printf("Mutex n in thread t2 is locked.\n");
+			printf("Thread t2 made its jobs.\n");
 			i += 1;
 			job_is_done = true;
 			pthread_mutex_unlock(&n);
@@ -31,18 +31,18 @@ void* t1f(void *args) {
 		}
 
 	}
-	printf("Finished job in t1 thread.\n");
+	printf("Finished job in t2 thread.\n");
 	return NULL;
 }
 
-void* t2f(void *args) {
+void* t1f(void *args) {
 	pthread_mutex_lock(&n);
 	if (i > 0) {
-		printf("Thread t2 made its jobs.\n");
+		printf("Thread t1 made its jobs.\n");
 		pthread_mutex_unlock(&n);
 	}
 	else {
-		printf("Thread t2 does not has a job.\n");
+		printf("Thread t1 does not has a job.\n");
 	}
 	return NULL;
 }
