@@ -30,6 +30,7 @@ int main() {
     pthread_create(&t2, NULL, t2f, NULL);
     
     pthread_join(t1, NULL);
+    pthread_join(t2, NULL);
     printf("App finish work with counter = %d\n", counter);
     return 0;
 }
