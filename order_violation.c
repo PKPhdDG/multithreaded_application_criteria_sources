@@ -1,50 +1,40 @@
-#include <pthread.h>
-#include <stdbool.h>
 #include <stdio.h>
-#include <unistd.h>
+#include <stdlib.h>
+#include <string.h>
+#include <pthread.h>
 
-pthread_mutex_t m;
-volatile int i = 1;
-
-// Thread 1
-void* t1f(void *args)
-{
-
-    for (int j = 0; j < 3; ++j)
-    {
-        pthread_mutex_lock(&m);
-        switch(i) {
-            case 1:
-                printf("%d\n", i++);
-                break;
-            case 2:
-                printf("%d\n", i++);
-                break;
-            default:
-                printf("%d\n", i);
-                i = 0;
-        }
-        pthread_mutex_unlock(&m);
-    }
-    return NULL;
-}
+pthread_mutex_t n;
 
 // Thread 2
-void* t2f(void *args)
-{
-    pthread_mutex_lock(&m);
-    i = 1;
-    pthread_mutex_unlock(&m);
-    return NULL;
+void* t2f(void *args) {
+    char *string = *(char**)args;
+    const char source[] = "Hello world";
+
+    pthread_mutex_lock(&n);
+    memcpy(string, source, strlen(source));
+    pthread_mutex_unlock(&n);
+	return NULL;
+}
+// Thread 1
+void* t1f(void *args) {
+	pthread_mutex_lock(&n);
+	char *string = (char *)malloc(sizeof(char)*20);
+    pthread_mutex_unlock(&n);
+
+	return string;
 }
 
 int main() {
     pthread_t t1, t2;
+    char *string;
 
-    pthread_create(&t1, NULL, t1f, NULL);
-    pthread_create(&t2, NULL, t2f, NULL);
+    pthread_create(&t1, NULL, t1f, (void *)NULL);
+    pthread_create(&t2, NULL, t2f, (void **)&string);
 
-    pthread_join(t1, NULL);
+    pthread_join(t1, (void**)&string);
     pthread_join(t2, NULL);
+
+    printf("1: %s\n", string);
+    free(string);
     return 0;
 }
