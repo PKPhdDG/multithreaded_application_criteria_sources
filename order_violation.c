@@ -1,32 +1,50 @@
+#include <pthread.h>
+#include <stdbool.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <unistd.h>
 
-const size_t NUM_OF_ELEMENTS=10;
+pthread_mutex_t m;
+volatile int i = 1;
 
-char* allocate_memory(void)
+// Thread 1
+void* t1f(void *args)
 {
-    char *str = (char*)malloc(sizeof(char)*NUM_OF_ELEMENTS);
-    if (NULL == str) exit(1);
-    return str;
+
+    for (int j = 0; j < 3; ++j)
+    {
+        pthread_mutex_lock(&m);
+        switch(i) {
+            case 1:
+                printf("%d\n", i++);
+                break;
+            case 2:
+                printf("%d\n", i++);
+                break;
+            default:
+                printf("%d\n", i);
+                i = 0;
+        }
+        pthread_mutex_unlock(&m);
+    }
+    return NULL;
 }
 
-void free_memory(char *str)
+// Thread 2
+void* t2f(void *args)
 {
-    (NULL == str) ? NULL : free(str);
+    pthread_mutex_lock(&m);
+    i = 1;
+    pthread_mutex_unlock(&m);
+    return NULL;
 }
 
-void fill_memory(char *str)
-{
-    memset(str, '-', NUM_OF_ELEMENTS*sizeof(char));
-}
+int main() {
+    pthread_t t1, t2;
 
-int main()
-{
-    char *str=NULL;
-    fill_memory(str);
-    str=allocate_memory();
-    printf("%s\n", str);
-    free_memory(str);
+    pthread_create(&t1, NULL, t1f, NULL);
+    pthread_create(&t2, NULL, t2f, NULL);
+
+    pthread_join(t1, NULL);
+    pthread_join(t2, NULL);
     return 0;
 }
